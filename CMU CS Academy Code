@@ -1,0 +1,448 @@
+
+#IMPORTS
+mainBG = Image('https://t3.ftcdn.net/jpg/02/58/99/42/360_F_258994216_zu9hTrycqkUa3GMpB58HtcXaiEQfKMs9.jpg', 0, 0, height=400, width=450)
+gameOverBG = Image('https://media.istockphoto.com/videos/black-geometric-squares-abstract-technology-motion-background-video-id1169274951?b=1&k=6&m=1169274951&s=640x640&h=-OonzGNlN2Uos2uFds2UqVe8rSf9Yzs_Buza17SQcuc=', -100, 0, height=400, width=700, visible=False)
+title = Image('https://upload.wikimedia.org/wikipedia/en/7/71/DDR_A_Logo.png', 70, 20, height=150, width=260)
+paintSplash = Image('https://lh6.googleusercontent.com/proxy/GaOc1Jfj2NgqXppNlmupR3NiuWAHE8bWkbFuXFHRoNmhoIKjmSjqSsRZjV273zF13frzZ9q48mW_ONcOEX4yvUl_6blLmcHOtN8D4DCBfHHffg=w1200-h630-p-k-no-nu', 125, 80, height=50, width=125, rotateAngle=5)
+libertyMarch = Sound('https://s3.amazonaws.com/cmu-cs-academy.lib.prod/sounds/Liberty_bell_march.mp3')
+Overture = Sound('https://s3.amazonaws.com/cmu-cs-academy.lib.prod/sounds/1812-overture-finale.mp3')
+
+
+
+#GLOBALS
+app.menu = True
+
+app.start = False
+app.isPlaying = False
+app.gameOver = False
+app.starFill = False
+
+app.points=0
+app.missedArrows = 0
+app.arrowsLeft = 0
+app.setMaxShapeCount(1999)
+
+username = app.getTextInput('username')
+
+#GROUPS
+menu = Group()
+classicButton = Group()
+menu.add(classicButton)
+topArrows = Group()
+movingArrows = Group()
+pointNumbers = Group()
+
+completeLabel = Group(
+    Label('SONG COMPLETE', 199, 81, size=40, font='sans', fill=None, border='navy', borderWidth=5, bold=True, visible=False),
+    Label('SONG COMPLETE', 200, 80, size=40, font='sans', fill='white', bold=True, visible=False)
+    )
+username = Group(
+    Label(username, 197, 141, fill=None, border='navy', borderWidth=7, size=40, font='sans', bold=True, visible=False),
+    Label(username, 200, 140, fill='white', size=40, font='sans', bold=True, visible=False)
+    )
+codingLabel = Group(
+    Label('CODING', 170, 63, font='sans', size=40, fill=None, bold=True, border='navy', borderWidth=7, rotateAngle=3),
+    Label('CODING', 170, 60, font='sans', size=40, fill='white', bold=True, rotateAngle=3)
+    )
+pointsLabel = Group(
+    Label('score: ' + str(app.points), 355, 361, size=20, font='sans', fill=None, border='black', borderWidth=2, bold=True, visible=False),
+    Label('score: ' + str(app.points), 354, 360, size=20, font='sans', fill=gradient('purple', 'white', start='top'), bold=True, visible=False)
+    )
+arrowsLeftLabel = Group(
+    Label('arrows remaining :', 91, 361, size=20, fill=None, border='black', borderWidth=2, font='sans', visible=False, bold=True),
+    Label('arrows remaining :', 90, 360, size=20, fill=gradient('purple', 'white', start='top'), font='sans', visible=False, bold=True)
+    )
+
+starScore = []
+starScoreOutline = []
+for i in range(5):
+    starScoreOutline.append(
+        Star(120+(i*40), 270, 20, 5, fill=None, border='white', borderWidth=3)
+        )
+for c in starScoreOutline:
+    c.visible=False
+
+yellow = Group()
+blue = Group()
+lime = Group()
+purple = Group()
+
+
+
+#LISTS
+songList = [libertyMarch, Overture]
+bottomArrows = []
+
+
+
+#OBJECTS
+#creating classic button
+classicButton.add(Rect(160, 200, 120, 70, fill=gradient('purple', 'white', start='top')))
+color = gradient('purple', 'white', start='top')
+classicButton.add(
+    Circle(classicButton.left, classicButton.centerY, classicButton.height-35, fill=color),
+    Circle(classicButton.right, classicButton.centerY, classicButton.height-35, fill=color)
+    )    
+classicButton.add(
+    Label('classic', 219, 236, font='sans', size=35, fill=None, bold=True, border='black', borderWidth=2),
+    Label('classic', 220, 235, font='sans', size=35, fill=gradient('purple', 'white', start='top'), bold=True)
+    )
+
+#creating the outline arrows
+for i in range(4):
+    arrow = Polygon(60, 15, 20, 60, 40, 60, 40, 90, 80, 90, 80, 60, 100, 60, fill=gradient('purple', 'black'), border='white', borderWidth=5)
+    arrow.rotateAngle = i*90
+    arrow.centerX = 60+(i*90)
+    topArrows.add(arrow)
+
+#creating arrows function
+def drawArrows():
+    for i in range(4):
+        arrow = Polygon(60, 15, 20, 60, 40, 60, 40, 90, 80, 90, 80, 60, 100, 60, fill='white', border='white', borderWidth=5)
+        arrow.rotateAngle = i*90
+        arrow.centerX = 60+(i*90)
+        randY = randrange(500, 5000)
+        arrow.centerY = randY
+        bottomArrows.append(arrow)
+        if(arrow.centerX<113):
+            arrow.fill='yellow'
+        elif(arrow.centerX<200):
+            arrow.fill='skyBlue'
+        elif(arrow.centerX<293):
+            arrow.fill='lime'
+        elif(arrow.centerX>290):
+            arrow.fill='purple'
+        movingArrows.add(arrow)
+
+#draws random set of arrows
+for i in range(13):
+    drawArrows()
+
+#adding arrows to respective groups
+for arrow in movingArrows.children:
+    if(arrow.fill=='yellow'):
+        yellow.add(arrow)
+    if(arrow.fill=='skyBlue'):
+        blue.add(arrow)
+    if(arrow.fill=='lime'):
+        lime.add(arrow)
+    if(arrow.fill=='purple'):
+        purple.add(arrow)
+movingArrows.add(yellow, blue, lime, purple)
+
+topArrows.visible=False
+arrowsLeftLabel.visible=False
+pointsLabel.visible=False
+username.visible=False
+completeLabel.visible=False
+
+
+#FUNCTIONS
+
+def center(object, x, y):
+    
+    object.centerX=x
+    object.centerY=y
+
+center(classicButton, 200, 240)
+pointsLabel.right = 380
+arrowsLeftLabel.left = 20
+
+def getStarScore():
+    if(app.points>99 and app.points < 199):
+        s = 1
+    if(app.points>=199 and app.points < 299):
+        s = 2
+    if(app.points>=299 and app.points < 399):
+        s = 3
+    if(app.points>=399 and app.points < 499):
+        s = 4
+    if(app.points>=499):
+        s = 5
+    
+    if(app.starFill==False):
+        for i in range(s):
+            starScore.append(
+                Star(120+(i*40), 270, 17, 5, fill=gradient('yellow', 'white'), border='white')
+                )
+            app.starFill=True
+
+def orderVisibility():
+    if(app.menu == True):
+    
+        mainBG.visible = True
+        paintSplash.visible = True
+        classicButton.visible = True
+        title.visible = True
+        codingLabel.visible = True
+        
+        completeLabel.visible=False
+        gameOverBG.visible = False
+        pointsLabel.visible = False
+        arrowsLeftLabel.visible = False
+        topArrows.visible = False
+        yellow.visible = False
+        blue.visible = False
+        lime.visible = False
+        purple.visible = False
+        username.visible=False
+        
+        pointsLabel.right = 380
+        arrowsLeftLabel.left = 20
+    
+        for c in starScoreOutline:
+            c.visible=False
+            
+    if(app.start == True):
+        
+        mainBG.visible = True
+        pointsLabel.visible = True
+        arrowsLeftLabel.visible = True
+        topArrows.visible = True
+        yellow.visible = True
+        blue.visible = True
+        lime.visible = True
+        purple.visible = True
+        
+        completeLabel.visible=False
+        gameOverBG.visible = False
+        username.visible=False
+        codingLabel.visible = False
+        classicButton.visible = False
+        title.visible = False
+        paintSplash.visible = False
+        
+        for c in starScoreOutline:
+            c.visible=False
+            
+    if(app.gameOver == True):
+        
+        center(pointsLabel, 200, 200)
+        for label in pointsLabel.children:
+            if(label.fill==None):
+                label.border='navy'
+                label.borderWidth=6
+                label.centerY=201
+                label.centerX=199
+            else:
+                label.fill='white'
+            label.size=40
+        
+        for c in starScoreOutline:
+            c.visible=True
+            
+        gameOverBG.visible = True
+        pointsLabel.visible = True
+        username.visible=True
+        completeLabel.visible = True
+        
+        mainBG.visible = False
+        arrowsLeftLabel.visible = False
+        codingLabel.visible = False
+        classicButton.visible = False
+        title.visible = False
+        paintSplash.visible = False
+        getStarScore()
+
+        
+def gameOver():
+    if(app.arrowsLeft==0):
+        app.gameOver = True
+    if(app.gameOver == True):
+        topArrows.visible=False        
+ 
+ 
+        
+def points(x):
+    app.points += x/2
+    if(x>0):
+        a = 'lime'
+    else:
+        a = 'red'
+    pointNumbers.add(
+        Label(x, 199, 201, fill=None, border='white', borderWidth=1, size=45),
+        Label(x, 200, 200, fill=a, size=45)
+        )
+        
+
+        
+def arrowsLeftAdd():
+    for arrow in yellow.children:
+        app.arrowsLeft+=1
+        
+    for arrow in blue.children:
+        app.arrowsLeft+=1
+        
+    for arrow in lime.children:
+        app.arrowsLeft+=1
+        
+    for arrow in purple.children:
+        app.arrowsLeft+=1
+        
+arrowsLeftAdd()
+
+
+
+def offScreenArrow():
+    for arrow in yellow.children:
+        if(arrow.bottom <= 15):
+            yellow.remove(arrow)
+            app.missedArrows+=1
+            app.arrowsLeft-=1
+            
+    for arrow in blue.children:
+        if(arrow.bottom <= 22):
+            blue.remove(arrow)
+            app.missedArrows+=1
+            app.arrowsLeft-=1
+            
+    for arrow in lime.children:
+        if(arrow.bottom <= 34):
+            lime.remove(arrow)
+            app.missedArrows+=1
+            app.arrowsLeft-=1
+            
+    for arrow in purple.children:
+        if(arrow.bottom <= 22):
+            purple.remove(arrow)
+            app.missedArrows+=1
+            app.arrowsLeft-=1
+            
+
+
+def checkArrowYellow():
+    for arrow in yellow.children:
+        if(arrow.top==yellow.top):
+            hit = topArrows.hitTest(arrow.centerX, arrow.centerY)
+            if(hit!=None):
+                points(10)
+                return True
+            else:
+                points(-10)
+def arrowRemoveYel():
+    if(checkArrowYellow()==True):
+        for arrow in yellow.children:
+            hit = topArrows.hitTest(arrow.centerX, arrow.centerY)
+            if(hit!=None):
+                yellow.remove(arrow)
+                app.arrowsLeft-=1
+
+
+
+def checkArrowBlue():
+    for arrow in blue.children:
+        if(arrow.top==blue.top):
+            hit = topArrows.hitTest(arrow.centerX, arrow.centerY)
+            if(hit!=None):
+                points(10)
+                return True
+            else:
+                points(-10)
+def arrowRemoveBlue():
+    if(checkArrowBlue()==True):
+        for arrow in blue.children:
+            hit = topArrows.hitTest(arrow.centerX, arrow.centerY)
+            if(hit!=None):
+                blue.remove(arrow)
+                app.arrowsLeft-=1
+                
+                
+                
+def checkArrowLime():
+    for arrow in lime.children:
+        if(arrow.top==lime.top):
+            hit = topArrows.hitTest(arrow.centerX, arrow.centerY)
+            if(hit!=None):
+                points(10)
+                return True
+            else:
+                points(-10)
+def arrowRemoveLime():
+    if(checkArrowLime()==True):
+        for arrow in lime.children:
+            hit = topArrows.hitTest(arrow.centerX, arrow.centerY)
+            if(hit!=None):
+                lime.remove(arrow)
+                app.arrowsLeft-=1
+                
+                
+                
+def checkArrowPurple():
+    for arrow in purple.children:
+        if(arrow.top==purple.top):
+            hit = topArrows.hitTest(arrow.centerX, arrow.centerY)
+            if(hit!=None):
+                points(10)
+                return True
+            else:
+                points(-10)
+def arrowRemovePurple():
+    if(checkArrowPurple()==True):
+        for arrow in purple.children:
+            hit = topArrows.hitTest(arrow.centerX, arrow.centerY)
+            if(hit!=None):
+                purple.remove(arrow)
+                app.arrowsLeft-=1
+
+
+
+def scoreAndArrowsLeft():
+    if(app.start == True):
+        for arrowLabel in arrowsLeftLabel.children:
+            arrowLabel.value = 'arrows remaining: ' + str(int(app.arrowsLeft))
+        for pointLabel in pointsLabel.children:
+            pointLabel.value = 'score: ' + str(int(app.points))
+    
+    
+
+
+def onMousePress(mouseX, mouseY):
+    if(classicButton.hits(mouseX, mouseY)):
+        app.menu=False
+        app.start=True
+
+
+       
+def onStep():
+    
+    app.stepsPerSecond=20
+    orderVisibility()
+    offScreenArrow()
+    scoreAndArrowsLeft()
+    gameOver()
+    
+    for point in pointNumbers.children:
+        if(point.opacity>0):
+            point.opacity-=10
+        if(point.rotateAngle!=30):
+            point.rotateAngle+=3
+
+    if(app.start==True):
+        movingArrows.centerY-=7
+        if(app.isPlaying == False):
+            app.song = choice(songList)
+            app.song.play()
+            app.isPlaying=True
+        if(app.gameOver == True):
+            app.song.pause()
+
+
+def onKeyPress(key):
+    if(key=='up'):
+        checkArrowYellow()
+        arrowRemoveYel()
+        
+    if(key=='right'):
+        checkArrowBlue()
+        arrowRemoveBlue()
+        
+    if(key=='down'):
+        checkArrowLime()
+        arrowRemoveLime()
+        
+    if(key=='left'):
+        checkArrowPurple()
+        arrowRemovePurple()
+
+  
+        
